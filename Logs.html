@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logs</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #3498db;
+            --text-color: #2d3436;
+            --bg-color: #f8f9fa;
+            --border-color: #e9ecef;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            position: relative;
+        }
+
+        .filter-input {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            min-width: 200px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .logs-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-color);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background: #e9ecef;
+        }
+
+        th i {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .action-login { background: var(--info-color); }
+        .action-create { background: var(--success-color); }
+        .action-update { background: var(--warning-color); }
+        .action-delete { background: var(--danger-color); }
+
+        .timestamp {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .page-info {
+            color: #666;
+        }
+
+        .page-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-input {
+                width: 100%;
+            }
+        }
+
+        /* Animation for new logs */
+        @keyframes highlightRow {
+            0% { background-color: rgba(67, 97, 238, 0.1); }
+            100% { background-color: transparent; }
+        }
+
+        .new-log {
+            animation: highlightRow 2s ease-out;
+        }
+
+        /* Export button */
+        .export-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        .status-success { background: var(--success-color); }
+        .status-error { background: var(--danger-color); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">
+                <i class="fas fa-history"></i>
+                System Logs
+            </h1>
+            <div class="filters">
+                <div class="filter-group">
+                    <input type="text" class="filter-input" placeholder="Search by user..." id="userFilter">
+                </div>
+                <div class="filter-group">
+                    <select class="filter-input" id="actionFilter">
+                        <option value="">All Actions</option>
+                        <option value="login">Login</option>
+                        <option value="create">Create</option>
+                        <option value="update">Update</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <input type="date" class="filter-input" id="dateFilter">
+                </div>
+                <button class="export-btn" onclick="exportLogs()">
+                    <i class="fas fa-download"></i>
+                    Export Logs
+                </button>
+            </div>
+        </div>
+
+        <div class="logs-container">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('timestamp')">
+                                Timestamp
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th onclick="sortTable('user')">
+                                User
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th onclick="sortTable('action')">
+                                Action
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th onclick="sortTable('details')">
+                                Details
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th onclick="sortTable('status')">
+                                Status
+                                <i class="fas fa-sort"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <!-- Table content will be dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <div class="page-info">
+                    Showing <span id="startRecord">1</span> to <span id="endRecord">10</span> of <span id="totalRecords">0</span> entries
+                </div>
+                <div class="page-buttons">
+                    <button class="page-btn" onclick="changePage(-1)" id="prevBtn" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn" onclick="changePage(1)" id="nextBtn">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample logs data
+        let logs = [
+            {
+                id: 1,
+                timestamp: '2023-07-20T10:30:00',
+                user: 'admin@example.com',
+                action: 'login',
+                details: 'Successful login attempt',
+                status: 'success'
+            },
+            {
+                id: 2,
+                timestamp: '2023-07-20T11:15:00',
+                user: 'admin@example.com',
+                action: 'create',
+                details: 'Created new user: john@example.com',
+                status: 'success'
+            },
+            {
+                id: 3,
+                timestamp: '2023-07-20T11:45:00',
+                user: 'john@example.com',
+                action: 'update',
+                details: 'Updated profile information',
+                status: 'success'
+            },
+            {
+                id: 4,
+                timestamp: '2023-07-20T12:00:00',
+                user: 'admin@example.com',
+                action: 'delete',
+                details: 'Deleted user: test@example.com',
+                status: 'success'
+            },
+            {
+                id: 5,
+                timestamp: '2023-07-20T12:30:00',
+                user: 'unknown@example.com',
+                action: 'login',
+                details: 'Failed login attempt',
+                status: 'error'
+            }
+        ];
+
+        // Current sort state
+        let currentSort = {
+            column: 'timestamp',
+            direction: 'desc'
+        };
+
+        // Pagination state
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Render logs table
+        function renderLogs(filteredLogs = logs) {
+            const tbody = document.getElementById('logsTableBody');
+            tbody.innerHTML = filteredLogs.map(log => `
+                <tr>
+                    <td class="timestamp">${formatTimestamp(log.timestamp)}</td>
+                    <td>${log.user}</td>
+                    <td>
+                        <span class="action-badge action-${log.action}">
+                            ${log.action}
+                        </span>
+                    </td>
+                    <td>${log.details}</td>
+                    <td>
+                        <span class="status-indicator status-${log.status}"></span>
+                        ${log.status}
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePagination(filteredLogs.length);
+        }
+
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString();
+        }
+
+        // Sort table
+        function sortTable(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+
+            logs.sort((a, b) => {
+                let comparison = 0;
+                if (a[column] > b[column]) comparison = 1;
+                if (a[column] < b[column]) comparison = -1;
+                return currentSort.direction === 'asc' ? comparison : -comparison;
+            });
+
+            renderLogs();
+            updateSortIcons();
+        }
+
+        // Update sort icons
+        function updateSortIcons() {
+            const headers = document.querySelectorAll('th');
+            headers.forEach(header => {
+                const icon = header.querySelector('i');
+                if (header.textContent.toLowerCase().includes(currentSort.column)) {
+                    icon.className = `fas fa-sort-${currentSort.direction}`;
+                } else {
+                    icon.className = 'fas fa-sort';
+                }
+            });
+        }
+
+        // Filter logs
+        function filterLogs() {
+            const userFilter = document.getElementById('userFilter').value.toLowerCase();
+            const actionFilter = document.getElementById('actionFilter').value.toLowerCase();
+            const dateFilter = document.getElementById('dateFilter').value;
+
+            const filteredLogs = logs.filter(log => {
+                const matchUser = log.user.toLowerCase().includes(userFilter);
+                const matchAction = !actionFilter || log.action === actionFilter;
+                const matchDate = !dateFilter || log.timestamp.includes(dateFilter);
+                return matchUser && matchAction && matchDate;
+            });
+
+            renderLogs(filteredLogs);
+        }
+
+        // Update pagination
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            document.getElementById('startRecord').textContent = ((currentPage - 1) * itemsPerPage) + 1;
+            document.getElementById('endRecord').textContent = Math.min(currentPage * itemsPerPage, totalItems);
+            document.getElementById('totalRecords').textContent = totalItems;
+            
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+        }
+
+        // Change page
+        function changePage(delta) {
+            currentPage += delta;
+            filterLogs();
+        }
+
+        // Export logs
+        function exportLogs() {
+            const csv = [
+                ['Timestamp', 'User', 'Action', 'Details', 'Status'],
+                ...logs.map(log => [
+                    formatTimestamp(log.timestamp),
+                    log.user,
+                    log.action,
+                    log.details,
+                    log.status
+                ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'system_logs.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Event listeners
+        document.getElementById('userFilter').addEventListener('input', filterLogs);
+        document.getElementById('actionFilter').addEventListener('change', filterLogs);
+        document.getElementById('dateFilter').addEventListener('change', filterLogs);
+
+        // Initial render
+        renderLogs();
+    </script>
+</body>
+</html>

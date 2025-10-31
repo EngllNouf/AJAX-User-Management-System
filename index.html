@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4361ee;
+            --error-color: #ef233c;
+            --success-color: #2ecc71;
+            --bg-color: #f8f9fa;
+            --text-color: #2b2d42;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f6f6f6 0%, #e9e9e9 100%);
+        }
+
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .input-group label {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            padding: 0 5px;
+            color: #666;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:valid ~ label {
+            top: 0;
+            font-size: 0.85rem;
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            background: #fff3f3;
+            color: var(--error-color);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .login-btn:hover {
+            background: #3451d1;
+            transform: translateY(-1px);
+        }
+
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+
+        .login-btn.loading {
+            color: transparent;
+        }
+
+        .login-btn .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .login-btn.loading .spinner {
+            display: block;
+            color: white;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .remember-me input[type="checkbox"] {
+            accent-color: var(--primary-color);
+        }
+
+        .forgot-password {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+
+        /* Success message styles */
+        .success-message {
+            background: #efffef;
+            color: var(--success-color);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Please enter your credentials to login</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="text" id="username" required>
+                <label for="username">Username</label>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="password" required>
+                <label for="password">Password</label>
+            </div>
+
+            <div class="remember-forgot">
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                Login
+                <span class="spinner">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </span>
+            </button>
+        </form>
+
+        <div class="loading-overlay">
+            <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+        </div>
+    </div>
+
+    <script>
+     document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const loginBtn = document.getElementById('loginBtn');
+    const loadingOverlay = document.querySelector('.loading-overlay');
+
+    // Utility functions for showing messages and loading states
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        successMessage.style.display = 'none';
+        loginForm.classList.add('shake');
+        setTimeout(() => {
+            errorMessage.style.display = 'none';
+            loginForm.classList.remove('shake');
+        }, 3000);
+    }
+
+    function showSuccess(message) {
+        successMessage.textContent = message;
+        successMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 3000);
+    }
+
+    function startLoading() {
+        loginBtn.classList.add('loading');
+        loadingOverlay.classList.add('active');
+        loginBtn.disabled = true;
+    }
+
+    function stopLoading() {
+        loginBtn.classList.remove('loading');
+        loadingOverlay.classList.remove('active');
+        loginBtn.disabled = false;
+    }
+
+    // Form submission handler
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        // Front-end validation
+        if (!username) {
+            showError('Please enter your username');
+            return;
+        }
+
+        if (!password) {
+            showError('Please enter your password');
+            return;
+        }
+
+      
+
+        startLoading();
+
+        // AJAX request
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'login.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        xhr.onload = function() {
+            stopLoading();
+            
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    
+                    if (response.success) {
+                        showSuccess(response.message || 'Login successful! Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = response.redirect || '/dashboard';
+                        }, 1500);
+                    } else {
+                        showError(response.message || 'Invalid credentials');
+                    }
+                } catch (e) {
+                    // Fallback for non-JSON responses
+                    if (xhr.responseText.includes('Welcome')) {
+                        showSuccess('Login successful! Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    } else {
+                        showError(xhr.responseText || 'Invalid credentials');
+                    }
+                }
+            } else {
+                showError('Server error! Please try again later.');
+            }
+        };
+
+        xhr.onerror = function() {
+            stopLoading();
+            showError('Connection error! Please check your internet connection.');
+        };
+
+        xhr.ontimeout = function() {
+            stopLoading();
+            showError('Request timed out! Please try again.');
+        };
+
+        // Set timeout for request
+        xhr.timeout = 10000; // 10 seconds
+
+        // Send the request with CSRF token if available
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        let formData = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+        if (csrfToken) {
+            formData += `&csrf_token=${encodeURIComponent(csrfToken)}`;
+        }
+
+        xhr.send(formData);
+    });
+
+    // Input animations and validation
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        // Focus effects
+        input.addEventListener('focus', () => {
+            input.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', () => {
+            if (!input.value) {
+                input.parentElement.classList.remove('focused');
+            }
+            validateInput(input);
+        });
+
+        // Real-time validation
+        input.addEventListener('input', () => {
+            validateInput(input);
+        });
+    });
+
+    function validateInput(input) {
+        const parent = input.parentElement;
+        
+        if (input.id === 'username') {
+            if (input.value.length < 3) {
+                parent.classList.add('error');
+                parent.dataset.error = 'Username must be at least 3 characters';
+            } else {
+                parent.classList.remove('error');
+                delete parent.dataset.error;
+            }
+        }
+        
+    
+    }
+
+    // Remember me functionality
+    const rememberMe = document.getElementById('rememberMe');
+    if (rememberMe) {
+        rememberMe.checked = localStorage.getItem('rememberMe') === 'true';
+        rememberMe.addEventListener('change', () => {
+            localStorage.setItem('rememberMe', rememberMe.checked);
+        });
+    }
+});
+    </script>
+</body>
+</html>
