@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"> <!-- This link is for the icons used on the page -->
+    <link rel="stylesheet" href="Logs.css">
+   
+</head>
+<body>
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon login">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="loginCount">0</h3> 
+                    <p>Login Events</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon create">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="createCount">0</h3>
+                    <p>Create Events</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon update">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="updateCount">0</h3>
+                    <p>Update Events</p>
+                    
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon delete">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="deleteCount">0</h3>
+                    <p>Delete Events</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <h1 class="title">
+                    <i class="fas fa-history"></i>
+                    System Activity Logs
+                </h1>
+                <div class="header-actions">
+                    <button class="btn btn-export" onclick="exportLogs()">
+                        <i class="fas fa-download"></i>
+                        Export CSV
+                    </button>
+                    <button class="btn btn-clear" onclick="showClearLogsModal()">
+                        <i class="fas fa-trash-alt"></i>
+                        Clear Logs
+                    </button>
+                </div>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label class="filter-label" for="userFilter">
+                        <i class="fas fa-user"></i> Search User
+                    </label>
+                    <input 
+                        type="text" 
+                        class="filter-input" 
+                        placeholder="Search by username..." 
+                        id="userFilter"
+                    >
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="actionFilter">
+                        <i class="fas fa-filter"></i> Filter Action
+                    </label>
+                    <select class="filter-select" id="actionFilter">
+                        <option value="">All Actions</option>
+                        <option value="login">Login</option>
+                        <option value="create">Create</option>
+                        <option value="update">Update</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="dateFilter">
+                        <i class="fas fa-calendar"></i> Filter Date
+                    </label>
+                    <input type="date" class="filter-input" id="dateFilter">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="statusFilter">
+                        <i class="fas fa-check-circle"></i> Filter Status
+                    </label>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="success">Success</option>
+                        <option value="error">Error</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Table -->
+        <div class="logs-container">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-table"></i>
+                    Activity Records
+                </div>
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    Live Updates
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('timestamp')">
+                                <i class="far fa-clock"></i> Timestamp
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th onclick="sortTable('user')">
+                                <i class="far fa-user"></i> User
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th onclick="sortTable('action')">
+                                <i class="fas fa-bolt"></i> Action
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th onclick="sortTable('details')">
+                                <i class="fas fa-info-circle"></i> Details
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th onclick="sortTable('status')">
+                                <i class="fas fa-check-circle"></i> Status
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th>
+                                <i class="fas fa-cog"></i> Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <i class="fas fa-spinner"></i>
+                                <h3>Loading Logs</h3>
+                                <p>Please wait while we fetch the activity data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <div class="page-info">
+                    Showing <strong><span id="startRecord">0</span></strong> to <strong><span id="endRecord">0</span></strong> of <strong><span id="totalRecords">0</span></strong> entries
+                </div>
+                <div class="page-buttons" id="pageButtons">
+                    <!-- Pagination buttons will be generated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="modal-title">Confirm Deletion</h2>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this log entry? This action cannot be undone.
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">
+                    Cancel
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDelete()">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Logs Modal -->
+    <div class="modal-overlay" id="clearLogsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <h2 class="modal-title">Clear All Logs</h2>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to clear all activity logs? This will permanently delete all records and cannot be undone.
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeClearLogsModal()">
+                    Cancel
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmClearLogs()">
+                    Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="Logs.js"></script>
+
+ 
+</body>
+</html>

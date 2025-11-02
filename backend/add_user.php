@@ -1,42 +1,47 @@
 <?php
-session_start(); // مهم جدًا لاستخدام $_SESSION
+session_start(); // Start the session to access $_SESSION variables
 header('Content-Type: application/json');
 
+// Database connection configuration
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "login_demo";
+$dbname = "users_management";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-$conn->set_charset("utf8mb4");
+// Create a new database connection
+$db = new mysqli($servername, $username, $password, $dbname);
+$db->set_charset("utf8mb4");
 
-if ($conn->connect_error) {
+// Check connection
+if ($db->connect_error) {
     die(json_encode(["success" => false, "message" => "Database connection failed"]));
 }
 
-// المستخدم الحالي
+// Get the current logged-in user and environment info
 $userEmail = $_SESSION['user_email'] ?? 'Unknown';
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
-// استلام البيانات من AJAX
+// Receive data from AJAX request
 $name = trim($_POST['name'] ?? '');
 $age = intval($_POST['age'] ?? 0);
 $email = trim($_POST['email'] ?? '');
 
+// Validate input fields
 if (!empty($name) && $age > 0 && !empty($email)) {
-    $stmt = $conn->prepare("INSERT INTO user_profiles (name, age, email) VALUES (?, ?, ?)");
+    // Insert new user into user_profiles table
+    $stmt = $db->prepare("INSERT INTO user_profiles (name, age, email) VALUES (?, ?, ?)");
     $stmt->bind_param("sis", $name, $age, $email);
 
     if ($stmt->execute()) {
         $userId = $stmt->insert_id;
 
-        // تسجيل العملية في system_logs
+        // Log the action in system_logs table
         $details = "Created user ID $userId: Name: $name, Age: $age, Email: $email";
         $action = 'create';
         $status = 'success';
 
-        $logStmt = $conn->prepare("
+        $logStmt = $db->prepare("
             INSERT INTO system_logs (user_email, action_type, details, status, ip_address, user_agent)
             VALUES (?, ?, ?, ?, ?, ?)
         ");
@@ -44,6 +49,7 @@ if (!empty($name) && $age > 0 && !empty($email)) {
         $logStmt->execute();
         $logStmt->close();
 
+        // Send JSON response with user data
         echo json_encode([
             "success" => true,
             "message" => "User added successfully",
@@ -55,13 +61,16 @@ if (!empty($name) && $age > 0 && !empty($email)) {
             ]
         ]);
     } else {
+        // Handle insert failure
         echo json_encode(["success" => false, "message" => "Database insert failed"]);
     }
 
     $stmt->close();
 } else {
+    // Handle missing input
     echo json_encode(["success" => false, "message" => "Please fill all fields"]);
 }
 
-$conn->close();
+// Close the database connection
+$db->close();
 ?>
