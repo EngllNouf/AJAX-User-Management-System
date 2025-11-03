@@ -4,7 +4,7 @@ A simple **web-based system** built with PHP, MySQL, HTML, CSS, and JavaScript (
 
 ---
 
-## 🚀 Features
+##  Features
 
 ### 🔐 Login Page
 
@@ -17,7 +17,7 @@ A simple **web-based system** built with PHP, MySQL, HTML, CSS, and JavaScript (
   * Incorrect password
   * Database error
 
-### 👥 Users Page
+###  Users Page
 
 * Shows all registered users in a responsive table.
 * Supports **Add**, **Edit**, and **Delete** operations.
@@ -36,7 +36,7 @@ A simple **web-based system** built with PHP, MySQL, HTML, CSS, and JavaScript (
 
 ---
 
-## 🗄️ Folder Structure
+##  Folder Structure
 
 ```
 USER-MANAGEMENT-SYSTEM/
@@ -65,7 +65,7 @@ USER-MANAGEMENT-SYSTEM/
 
 ---
 
-## ⚙️ How to Run Locally
+##  How to Run Locally
 
 ### Requirements:
 
@@ -73,36 +73,7 @@ USER-MANAGEMENT-SYSTEM/
 * PHP 8+
 * MySQL
 
-### Steps:
-
-1. Move the folder `USER-MANAGEMENT-SYSTEM` to:
-
-   ```
-   C:\xampp\htdocs\
-   ```
-2. Open **XAMPP Control Panel** → Start **Apache** and **MySQL**.
-3. Go to **phpMyAdmin** → Import the file:
-
-   ```
-   database.sql
-   ```
-4. Open the project in your browser:
-
-   ```
-   http://localhost/USER-MANAGEMENT-SYSTEM/frontend/
-   ```
-5. Login using test credentials:
-
-   ```
-   Username: any test user
-   Password: 123456
-   ```
-
-   *(All passwords are stored hashed for security.)*
-
----
-
-## 💡 Tech Stack
+##  Tech Stack
 
 | Layer        | Technologies Used            |
 | ------------ | ---------------------------- |
@@ -120,19 +91,16 @@ USER-MANAGEMENT-SYSTEM/
 1. **users** — Stores all user data (name, age, email, password hash).
 2. **logs** — Stores every operation (login, add, edit, delete) with timestamp and username.
 
-To import:
 
-```bash
-database.sql
-```
+
 
 ---
 
-## 🖼️ Screenshots
+##  Screenshots
 
 ### 🔐 Login Page
 
-*(Add your screenshot here)*
+*(![alt text](image.png))*
 
 ### 👥 Users Page
 
@@ -146,24 +114,24 @@ database.sql
 
 ## 🎥 Demo Video
 
-📽️ [Recording 2025-11-02 142817.mp4](Recording%202025-11-02%20142817.mp4)
+📽️ [C:\xampp\htdocs\User-Management-System\Recording 2025-11-02 142817.mp4](Recording%202025-11-02%20142817.mp4)
 
 ---
 
 ## 🧑‍💻 Developer
 
 **Noof Mohammed**
-GitHub: [@yourusername](https://github.com/yourusername)
+GitHub: [@Nouf Aljedaani](https://github.com/EngllNouf)
 
 ---
 
 ## 📝 Notes
 
-* All backend responses are in **JSON** format for AJAX integration.
+
 * Error handling covers:
 
   * Invalid requests
   * Database connection errors
   * Empty fields
 * Demo users share the same password: `123456` (hashed in DB).
-* Easy to extend with authentication sessions or role management.
+t.
