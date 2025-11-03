@@ -100,21 +100,21 @@ USER-MANAGEMENT-SYSTEM/
 
 ### 🔐 Login Page
 
-*(![alt text](image.png))*
+*![alt text](image.png)*
 
 ### 👥 Users Page
 
-*(Add your screenshot here)*
+![alt text](image-1.png)
 
 ### 🧾 Logs Page
 
-*(Add your screenshot here)*
+![alt text](image-2.png)
 
 ---
 
 ## 🎥 Demo Video
 
-📽️ [C:\xampp\htdocs\User-Management-System\Recording 2025-11-02 142817.mp4](Recording%202025-11-02%20142817.mp4)
+📽️ 
 
 ---
 
